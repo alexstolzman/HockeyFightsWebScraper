@@ -10,6 +10,8 @@ async function getFightCount(){
 
     const teams=[]
     const teamNames=[]
+    const teamRivals=[]
+    const rivals=[]
 
     //Get links to the fights page for each team
     var data=await page.$$eval(".teams-box>ul>li>a", elements=> elements.map(item=>item.href))
@@ -24,14 +26,28 @@ async function getFightCount(){
     var league=""
     const fights=[]
     const seasons=[]
+    const totalRivals=[]
+    teamRivals.length=0
 
     await page.goto(teams[j])
 
     data=await page.$$eval(".fight-totals", elements=> elements.map(item=>item.textContent))
     data2=await page.$$eval(".season", elements=> elements.map(item=>item.textContent))
 
+    var data3=await page.$$eval(".team-rivals > div >div> .team", elements=> elements.map(item=>item.textContent))
+    var data4=await page.$$eval(".team-rivals > div >div> .total", elements=> elements.map(item=>item.textContent))
+
     fights.push(...data)
     seasons.push(...data2)
+    teamRivals.push(...data3)
+    totalRivals.push(...data4)
+
+    for(let i=0;i<teamRivals.length;i++){
+        teamRivals[i]=teamNames[j]+","+teamRivals[i]+","+totalRivals[i]+'\n'
+        rivals.push(...teamRivals[i])
+    }
+
+    //console.log(teamRivals)
 
     if(j<32){
         league="NHL"
@@ -90,7 +106,7 @@ async function getFightCount(){
  }
 
     await fs.writeFileSync('hockeyfights.csv', teamNames.join(''));
-    
+    await fs.writeFileSync('teamrivals.csv', rivals.join(''));
 
 
 }
